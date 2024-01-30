@@ -1,0 +1,284 @@
+import 'dart:async';
+import 'dart:math';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:flutter_audio_capture/flutter_audio_capture.dart';
+import "widgets.dart";
+import 'package:activity_ring/activity_ring.dart';
+import 'package:pitch_detector_dart/algorithm/pitch_algorithm.dart';
+import 'package:pitch_detector_dart/algorithm/yin.dart';
+import 'package:pitch_detector_dart/pitch_detector.dart';
+import 'package:pitch_detector_dart/pitch_detector_result.dart';
+import 'package:provider/provider.dart';
+import 'package:pitchupdart/instrument_type.dart';
+import 'package:pitchupdart/pitch_handler.dart';
+import 'package:pitchupdart/pitch_result.dart';
+import 'package:pitchupdart/tuning_status.dart';
+import  'package:intl/intl.dart';
+
+
+//import 'mainbak.dart';
+const int _sampleRate = 44100;
+final pitchDetectorDart = PitchDetector(44100, 2000);
+final pitchUp = PitchHandler(InstrumentType.guitar);
+
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    //Provider.of(context, listen: false).startCapture();
+
+    return ChangeNotifierProvider(
+      create: (context) => MyAppState(),
+      child: MaterialApp(
+        //title: 'Namer App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.deepOrange),
+        ),
+        home: MyHomePage(),
+      ),
+    );
+  }
+
+
+}
+class MyAppState extends ChangeNotifier {
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+/*class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
+    final ringRadius = 0.5 * MediaQuery.of(context).size.width-8;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      
+      body: SizedBox(
+  width: MediaQuery.of(context).size.width,
+  height: MediaQuery.of(context).size.width,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment(0,0),
+          child: MyRing(
+            percent: 35,
+            color: Color.fromARGB(255, 65, 65, 65),
+            radius: ringRadius,
+            width: ringRadius*0.09,
+            showBackground: false,
+          ),
+        ),
+
+      Align(
+        child: MyRing(
+          percent: 100*8/12*0.15,
+          color:  Color.fromARGB(255, 26, 156, 0),
+          radius: ringRadius,
+          width: ringRadius*0.09,
+          showBackground: false,
+        ),        
+      ),
+            Align(
+        child: Ring(
+          percent: 0.1,
+          color: RingColorScheme(ringColor: Color.fromARGB(255, 198, 198, 198), gradient: false),
+          radius: ringRadius,
+          width: ringRadius*0.11,
+          showBackground: false,
+        ),        
+      ),
+]
+            ),
+      )
+    );
+  }
+}*/
+
+class _MyHomePageState extends State<MyHomePage> {
+  final _audioRecorder = FlutterAudioCapture();
+  final pitchDetectorDart = PitchDetector(44100, 2000);
+  final pitchupDart = PitchHandler(InstrumentType.guitar);
+late Stream<DateTime> timerStream;
+  late String datetime;
+  var note = "";
+  var status = "Click on start";
+  @override
+void initState() {
+    super.initState();
+    datetime = DateFormat("HH:mm").format(DateTime.now());
+    timerStream = Stream.periodic(Duration(seconds: 1), (_) => DateTime.now());
+    _startCapture();
+  }
+
+  Future<void> _startCapture() async {
+    await _audioRecorder.start(listener, onError,
+        sampleRate: 44100, bufferSize: 3000);
+
+    setState(() {
+      note = "";
+      status = "Play something";
+    });
+  }
+
+  Future<void> _stopCapture() async {
+    await _audioRecorder.stop();
+
+    setState(() {
+      note = "";
+      status = "Click on start";
+    });
+  }
+
+  void listener(dynamic obj) {
+    //Gets the audio sample
+    var buffer = Float64List.fromList(obj.cast<double>());
+    final List<double> audioSample = buffer.toList();
+
+    //Uses pitch_detector_dart library to detect a pitch from the audio sample
+    final result = pitchDetectorDart.getPitch(audioSample);
+
+    //If there is a pitch - evaluate it
+    if (result.pitched) {
+      //Uses the pitchupDart library to check a given pitch for a Guitar
+      final handledPitchResult = pitchupDart.handlePitch(result.pitch);
+
+      //Updates the state with the result
+      setState(() {
+        note = (result.pitch.roundToDouble()).toString();
+        status = handledPitchResult.tuningStatus.toString();
+      });
+    }
+  }
+
+  void onError(Object e) {
+    print(e);
+  }
+//String datetime = DateFormat("HH:mm").format(DateTime.now());
+
+  @override
+  Widget build(BuildContext context) {
+        final ringRadius = 0.5 * MediaQuery.of(context).size.width-8;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      //appBar: AppBar(
+        //title: Text(widget.title),
+      //),
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: [
+            SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
+            child: Stack(
+              children: [
+                //
+                Align(
+                  //alignment: Alignment(0,0),
+                child: MyRing(
+                  percent: 35,
+                  color: Color.fromARGB(255, 65, 65, 65),
+                  radius: ringRadius,
+                  width: ringRadius*0.09,
+                  showBackground: false,
+                ),
+              ),
+            
+            Align(
+              child: MyRing(
+                percent: 100*8/12*0.15,
+                color:  Color.fromARGB(255, 26, 156, 0),
+                radius: ringRadius,
+                width: ringRadius*0.09,
+                showBackground: false,
+              ),        
+            ),
+                  Align(
+              child: Ring(
+                percent: 0.1,
+                color: RingColorScheme(ringColor: Color.fromARGB(255, 198, 198, 198), gradient: false),
+                radius: ringRadius,
+                width: ringRadius*0.11,
+                showBackground: false,
+              ),        
+            ),
+            
+            //Align(
+              
+              //alignment: Alignment.bottomCenter,
+              //child: Column(children: [
+                Align(
+                  alignment: Alignment(0, 0),
+            
+              child: StreamBuilder<DateTime>(
+                stream: timerStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Text('Loading...');
+                  }
+                  datetime = DateFormat("HH:mm").format(snapshot.data!);
+                  return Text(
+                    datetime,
+                    style: TextStyle(fontSize: 24, color: Colors.white,),
+                  );
+                },
+              ),
+                ),
+                const Spacer(),
+                Center(
+                  
+                    child: Text(
+                  note,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.bold),
+                )),
+                //const Spacer(),
+                Center(
+                    child: Text(
+                  status,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                )),
+                /*Expanded(
+                    child: Row(
+                  children: [
+                    Expanded(
+                        child: Center(
+                            child: FloatingActionButton(
+                                onPressed: _startCapture,
+                                child: const Text("Start")))),
+                    Expanded(
+                        child: Center(
+                            child: FloatingActionButton(
+                                onPressed: _stopCapture, child: const Text("Stop")))),
+                  ],
+                ))*/
+              ]),
+            ),
+          ],
+        ),
+      ),
+//]
+            );
+      //)
+      
+    //);
+  }
+}
