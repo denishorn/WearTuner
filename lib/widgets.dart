@@ -1,148 +1,293 @@
-import 'package:activity_ring/activity_ring.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-import 'package:time_text/time_text.dart';
+import 'tuner.dart'; // Make sure to import the TunerWidget correctly
 
-// TODO create own ring / rectangular widged and show one based on watch form
-class MyRing extends StatelessWidget {
-  final double percent;
-  final Color color;
-  final double radius;
-  final double width;
-  final bool showBackground;
+class ControlsAndTunerWidget extends StatelessWidget {
+  final VoidCallback onStartPressed;
+  final VoidCallback onStopPressed;
+  final BoxConstraints constraints;
 
-  MyRing({
-    required this.percent,
-    required this.color,
-    required this.radius,
-    required this.width,
-    required this.showBackground,
-  });
+  const ControlsAndTunerWidget({
+    Key? key,
+    required this.onStartPressed,
+    required this.onStopPressed,
+    required this.constraints,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+  return Container(
+    constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-   Ring(
-            percent: percent,
-            color: RingColorScheme(
-              ringColor: color,
-              gradient: false,
-            ),
-            radius: radius,
-            width: width,
-            curve: Curves.easeInOutCubic,
-            showBackground: showBackground,
+        // const SizedBox(width: 16),
+        SizedBox(
+          width: MediaQuery.of(context).size.width/2 - 30,
+          child: FloatingActionButton(
+            onPressed: onStartPressed,
+            child: const Text("Start"),
           ),
-        
-Transform(
-  alignment: Alignment.center,
-  transform: Matrix4.rotationY(math.pi),
-
-          child: Ring(
-            percent: percent,
-            color: RingColorScheme(
-              ringColor: color,
-              gradient: false,
-            ),
-            radius: radius,
-            width: width,
-            curve: Curves.easeInOutCubic,
-            showBackground: showBackground,
+        ),
+        // const SizedBox(width: 16),
+        SizedBox(
+          width: MediaQuery.of(context).size.width/2 - 30,
+          child: FloatingActionButton(
+            onPressed: onStopPressed,
+            child: const Text("Stop"),
           ),
-        
-      )
-
-
+        ),
+        // const SizedBox(width: 16),
       ],
+    ),
+  );
+  }
 
+}
+
+class TextDisplayWidget extends StatelessWidget {
+  final String note;
+  final String status;
+
+  const TextDisplayWidget({
+    Key? key,
+    required this.note,
+    required this.status,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(note),
+        Text(status),
+      ],
+    
     );
   }
 }
 
 
-Widget buildRings(double ringRadius, double turns, BuildContext context) {
-  return SizedBox(
-    width: MediaQuery.of(context).size.width,
-    height: MediaQuery.of(context).size.width,
-    child: Stack(
+// class TunerWidget extends StatefulWidget {
+//     final BoxConstraints constraints; 
+
+//     TunerWidget({Key? key, required this.constraints}) : super(key: key);
+
+//   @override
+//   _TunerWidgetState createState() => _TunerWidgetState();
+// }
+
+// class _TunerWidgetState extends State<TunerWidget> {
+//   final Guitar guitar = const Guitar();
+
+//   Note? selectedNote;
+//   bool isAutoTune = true; // true for auto, false for manual
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return  Column(
+//       children: [
+//         SizedBox(
+//           height: 150,
+//           child: Stack(
+//             alignment: Alignment.center,
+//             children: [
+//               //Center(child:
+//                 Container(
+//                 height: 50,
+//                 width: MediaQuery.of(context).size.width - 40,
+//                 decoration: BoxDecoration(
+//                   color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33), // Use the theme's secondary color
+//                   borderRadius: BorderRadius.circular(15), // Adjust the radius to get the desired curvature
+//                 ),
+//               //)
+//               ),
+//             ListWheelScrollView(
+//               itemExtent: 50,
+//               overAndUnderCenterOpacity: 0.5,
+//               physics: FixedExtentScrollPhysics(),
+//               diameterRatio: 3,
+//               children: guitar.tuning.map((Note note) => 
+//               //GestureDetector(onTap: ()=>print('1'),
+ 
+//               ListTile(
+//                 //child: Center(child: 
+//                 title:Text(note.toString(), textAlign: TextAlign.center),
+//                 onTap:(){print('!');}
+//                 //),
+//                 )
+//               )
+//               .toList(),
+//               onSelectedItemChanged: (index){},
+//             ),
+            
+//             ]
+//           ),
+//         ),
+//         // Switch for toggling between auto and manual tuning
+//         SwitchListTile(
+//           title: Text(
+//           'Automatic mode',
+//           style: Theme.of(context).textTheme.titleMedium, // Adjust the title size according to the app theme
+//         ),
+//           subtitle: Text(
+//             'Switch to automatically detect your string',
+//             style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+//             ),
+//           value: isAutoTune,
+//           isThreeLine: true,
+//           onChanged: (bool value) {
+//             setState(() {
+//               isAutoTune = value;
+//             });
+//           },
+//         ),
+//       ],
+//     //)
+//     );
+//   }
+// }
+
+class TuningWheel extends StatefulWidget {
+  final Guitar guitar;
+  final Function(int) onNoteSelected;
+
+  const TuningWheel({Key? key, required this.guitar, required this.onNoteSelected}) : super(key: key);
+
+  @override
+  _TuningWheelState createState() => _TuningWheelState();
+}
+//import 'package:flutter/material.dart';
+
+class _TuningWheelState extends State<TuningWheel> {
+  final FixedExtentScrollController _controller = FixedExtentScrollController();
+  bool _isAnimating = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (!_isAnimating) { // Check if not already animating
+          int nextIndex = _controller.selectedItem + 1;
+          if (nextIndex >= widget.guitar.tuning.length) {
+            nextIndex = 0;
+          }
+
+          setState(() {
+            _isAnimating = true; // Set flag to true as animation starts
+          });
+
+          _controller.animateToItem(
+            nextIndex,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+          ).then((_) {
+            setState(() {
+              _isAnimating = false; // Reset flag when animation completes
+            });
+          });
+        }
+      },
+      child: ListWheelScrollView.useDelegate(
+        controller: _controller,
+        itemExtent: 50,
+        overAndUnderCenterOpacity: 0.5,
+        physics: _isAnimating ? NeverScrollableScrollPhysics() : FixedExtentScrollPhysics(), 
+        diameterRatio: 3,
+        childDelegate: ListWheelChildBuilderDelegate(
+          builder: (BuildContext context, int index) {
+            if (index < 0 || index >= widget.guitar.tuning.length) return null;
+            return ListTile(
+                title: Text(widget.guitar.tuning[index].toString(), textAlign: TextAlign.center),
+            );
+          },
+          childCount: widget.guitar.tuning.length,
+        ),
+        onSelectedItemChanged: widget.onNoteSelected,
+      ),
+    );
+  }
+}
+
+
+class AutoTuneSwitch extends StatelessWidget {
+  final bool isAutoTune;
+  final ValueChanged<bool> onChanged;
+
+  const AutoTuneSwitch({Key? key, required this.isAutoTune, required this.onChanged}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      title: Text(
+        'Automatic mode',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Text(
+        'Switch to automatically detect your string',
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+      value: isAutoTune,
+      isThreeLine: true,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class TunerWidget extends StatefulWidget {
+  final BoxConstraints constraints;
+
+  TunerWidget({Key? key, required this.constraints}) : super(key: key);
+
+  @override
+  _TunerWidgetState createState() => _TunerWidgetState();
+}
+
+class _TunerWidgetState extends State<TunerWidget> {
+  final Guitar guitar = const Guitar();
+  Note? selectedNote;
+  bool isAutoTune = true; // true for auto, false for manual
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
-        Align(
-          child: MyRing(
-            percent: 35,
-            color: Color.fromARGB(255, 65, 65, 65),
-            radius: ringRadius,
-            width: ringRadius * 0.09,
-            showBackground: false,
-          ),
-        ),
-        Align(
-          child: MyRing(
-            percent: 100 * 8 / 12 * 0.15,
-            color: Color.fromARGB(255, 26, 156, 0),
-            radius: ringRadius,
-            width: ringRadius * 0.09,
-            showBackground: false,
-          ),
-        ),
-        Align(
-          child: AnimatedRotation(
-            duration: Duration(milliseconds: 300),
-            turns: turns,
-            child: Ring(
-              percent: 0.1,
-              curve: Curves.easeInOutCirc,
-              color: RingColorScheme(
-                ringColor: Color.fromARGB(255, 198, 198, 198),
-                gradient: false,
+        SizedBox(
+          height: 150,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 50,
+                width: MediaQuery.of(context).size.width - 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33),
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
-              radius: ringRadius,
-              width: ringRadius * 0.11,
-              showBackground: false,
-            ),
+              TuningWheel(
+                guitar: guitar,
+                onNoteSelected: (index) {
+                  // Handle note selection
+                },
+              ),
+            ],
           ),
+        ),
+        AutoTuneSwitch(
+          isAutoTune: isAutoTune,
+          onChanged: (bool value) {
+            setState(() {
+              isAutoTune = value;
+            });
+          },
         ),
       ],
-    ),
-  );
+    );
+  }
 }
-
-Widget buildTopText(BuildContext context, double ringRadius) {
-  return Container(
-    alignment: Alignment.topCenter,
-    margin: EdgeInsets.only(top: ringRadius * 0.11),
-    child: TimeText(
-      style: Theme.of(context).textTheme.bodyMedium,
-    ),
-  );
-}
-
-Widget buildCenterText(String frequency) {
-  return Container(
-    alignment: Alignment.center,
-    child: Text(
-      frequency,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 25.0,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  );
-}
-
-Widget buildBottomText(double ringRadius, String expectedFrequency) {
-  return Container(
-    alignment: Alignment.center,
-    margin: EdgeInsets.only(top: ringRadius * 0.3),
-    child: Text(
-      expectedFrequency,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 14.0,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  );
-}
-

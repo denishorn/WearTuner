@@ -27,6 +27,8 @@ dependencies:
   animated_text_kit: ^4.2.1
   permission_handler: ^10.0.0
   vibration: ^1.7.3
+  dynamic_color: ^1.6.9
+  #clickable_list_wheel_view: ^0.2.0
 
 dev_dependencies:
   flutter_test:
