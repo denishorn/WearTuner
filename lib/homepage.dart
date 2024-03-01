@@ -26,6 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final pitchDetectorDart = PitchDetector(44100, 2000);
   //final pitchupDart = PitchHandler(InstrumentType.guitar);
   final Guitar guitar = const Guitar();
+  bool isAutoTune = true;
   var note = "";
   var status = "Click on start";
 
@@ -95,31 +96,47 @@ class _MyHomePageState extends State<MyHomePage> {
       //child: Center(
         child: Flex(
           direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              //height: MediaQuery.of(context).size.width,
+            Padding(padding: EdgeInsets.all(8.0), child:Container(
+              height: MediaQuery.of(context).size.width,
               alignment: Alignment.center,
-              height: 300, // This makes the container take up 1/4 of the screen height
+              //padding: EdgeInsets.all(16.0),
+
+              //height: 300, 
+              //width: 100,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33), // Use the theme's secondary color
                 borderRadius: BorderRadius.circular(15), // Adjust the radius to get the desired curvature
               ),
-              child: Center(child: TextDisplayWidget(note: note, status: status),),
-            ),
-            //Spacer(),
+              child: TextDisplayWidget(note: note, status: status),
+            ),),
+            /*SizedBox(width: 300, child:*/Flex(
+              direction: Axis.vertical,
+              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children:[
             ControlsAndTunerWidget(
               onStartPressed: _startCapture,
               onStopPressed: _stopCapture,
             ),
             //Spacer(flex: 10),
             TunerWidget(
-              // onStartPressed: _startCapture,
-              // onStopPressed: _stopCapture,
-            //   constraints: BoxConstraints(
-            //   maxWidth: 500, // Example constraint
-            // ),
+              isAutoTune: isAutoTune,
+              onChanged: (bool value) {
+                setState(() {
+                  isAutoTune = value;
+                });
+              },
             ),
+            // AutoTuneSwitch(
+            //   isAutoTune: isAutoTune,
+            //   onChanged: (bool value) {
+            //     setState(() {
+            //       isAutoTune = value;
+            //     });
+            //   },
+            // ),
+            ]),//),
         ]),
       //),
       ),

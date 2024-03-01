@@ -21,16 +21,16 @@ class ControlsAndTunerWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         // const SizedBox(width: 16),
-        SizedBox(
-          width: MediaQuery.of(context).size.width/2 - 30,
+        Padding(
+          padding: EdgeInsets.all(16.0),
           child: FloatingActionButton(
             onPressed: onStartPressed,
             child: const Text("Start"),
           ),
         ),
         // const SizedBox(width: 16),
-        SizedBox(
-          width: MediaQuery.of(context).size.width/2 - 30,
+        Padding(
+          padding: EdgeInsets.all(16.0),
           child: FloatingActionButton(
             onPressed: onStopPressed,
             child: const Text("Stop"),
@@ -79,7 +79,7 @@ class TuningWheel extends StatefulWidget {
 
 class _TuningWheelState extends State<TuningWheel> {
   final FixedExtentScrollController _controller = FixedExtentScrollController();
-  bool _isAnimating = false;
+  //bool _isAnimating = false;
 
   @override
   void dispose() {
@@ -91,41 +91,46 @@ class _TuningWheelState extends State<TuningWheel> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (!_isAnimating) { // Check if not already animating
+        //if (!_isAnimating) { // Checking if not already animating
           int nextIndex = _controller.selectedItem + 1;
-          if (nextIndex >= widget.guitar.tuning.length) {
-            nextIndex = 0;
-          }
+          // if (nextIndex >= widget.guitar.tuning.length) {
+          //   nextIndex = 0;
+          // }
 
-          setState(() {
-            _isAnimating = true; // Set flag to true as animation starts
-          });
+          // setState(() {
+          //   _isAnimating = true; // Setting flag to true as animation starts
+          // });
 
           _controller.animateToItem(
             nextIndex,
             duration: Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-          ).then((_) {
+          );},/*.then((_) {
             setState(() {
               _isAnimating = false; // Reset flag when animation completes
             });
           });
         }
-      },
+      },*/
       child: ListWheelScrollView.useDelegate(
         controller: _controller,
         itemExtent: 50,
         overAndUnderCenterOpacity: 0.5,
-        physics: _isAnimating ? NeverScrollableScrollPhysics() : FixedExtentScrollPhysics(), 
+        physics: /*_isAnimating ? NeverScrollableScrollPhysics() :*/ FixedExtentScrollPhysics(), 
         diameterRatio: 3,
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (BuildContext context, int index) {
-            if (index < 0 || index >= widget.guitar.tuning.length) return null;
-            return Center(child:Text(widget.guitar.tuning[index].toString()),
+            //if (index < 0 || index >= widget.guitar.tuning.length) return null;
+            int loopedIndex = index % widget.guitar.tuning.length;
+            if (loopedIndex < 0) {
+              loopedIndex += widget.guitar.tuning.length;
+            }
+            return Center(child:Text(widget.guitar.tuning[loopedIndex].toString()),
                 //tileColor:Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33),
             );
           },
-          childCount: widget.guitar.tuning.length,
+          // childCount: widget.guitar.tuning.length,
+          childCount: null
         ),
         onSelectedItemChanged: widget.onNoteSelected,
       ),
@@ -134,34 +139,36 @@ class _TuningWheelState extends State<TuningWheel> {
 }
 
 
-class AutoTuneSwitch extends StatelessWidget {
-  final bool isAutoTune;
-  final ValueChanged<bool> onChanged;
+// class AutoTuneSwitch extends StatelessWidget {
+//   final bool isAutoTune;
+//   final ValueChanged<bool> onChanged;
 
-  const AutoTuneSwitch({Key? key, required this.isAutoTune, required this.onChanged}) : super(key: key);
+//   const AutoTuneSwitch({Key? key, required this.isAutoTune, required this.onChanged}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: Text(
-        'Automatic mode',
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      subtitle: Text(
-        'Switch to automatically detect your string',
-        style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-      ),
-      value: isAutoTune,
-      isThreeLine: true,
-      onChanged: onChanged,
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return SwitchListTile(
+//       title: Text(
+//         'Automatic mode',
+//         style: Theme.of(context).textTheme.titleMedium,
+//       ),
+//       subtitle: Text(
+//         'Switch to automatically detect your string',
+//         style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+//       ),
+//       value: isAutoTune,
+//       isThreeLine: true,
+//       onChanged: onChanged,
+//     );
+//   }
+// }
 
 class TunerWidget extends StatefulWidget {
   //final BoxConstraints constraints;
+  final bool isAutoTune;
+  final ValueChanged<bool> onChanged;
 
-  TunerWidget({Key? key}) : super(key: key);
+  TunerWidget({Key? key, required this.isAutoTune, required this.onChanged}) : super(key: key);
 
   @override
   _TunerWidgetState createState() => _TunerWidgetState();
@@ -170,24 +177,26 @@ class TunerWidget extends StatefulWidget {
 class _TunerWidgetState extends State<TunerWidget> {
   final Guitar guitar = const Guitar();
   Note? selectedNote;
-  bool isAutoTune = true; // true for auto, false for manual
+  //bool isAutoTune = true; // true for auto, false for manual
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Flex(
+      direction: Axis.vertical,
       children: [
         // ControlsAndTunerWidget(
         //       onStartPressed: _startCapture,
         //       onStopPressed: _stopCapture,
         //     ),
-        SizedBox(
+        Container(
           height: 150,
+          padding: EdgeInsets.all(16.0),
           child: Stack(
             alignment: Alignment.center,
             children: [
               Container(
                 height: 50,
-                width: MediaQuery.of(context).size.width - 40,
+                //padding: EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33),
                   borderRadius: BorderRadius.circular(15),
@@ -202,14 +211,19 @@ class _TunerWidgetState extends State<TunerWidget> {
             ],
           ),
         ),
-        AutoTuneSwitch(
-          isAutoTune: isAutoTune,
-          onChanged: (bool value) {
-            setState(() {
-              isAutoTune = value;
-            });
-          },
-        ),
+        SwitchListTile(
+      title: Text(
+        'Automatic mode',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Text(
+        'Switch to automatically detect your string',
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+      value: widget.isAutoTune,
+      isThreeLine: true,
+      onChanged: widget.onChanged,
+    ),
       ],
     );
   }
