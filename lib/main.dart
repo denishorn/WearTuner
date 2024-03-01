@@ -1,13 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-//import 'package:flutter_audio_capture/flutter_audio_capture.dart';
-//import 'package:pitch_detector_dart/pitch_detector.dart';
-//import 'package:pitchupdart/instrument_type.dart';
-//import 'package:pitchupdart/pitch_handler.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:flutter/foundation.dart';
 
 
 
@@ -33,16 +28,14 @@ class MyApp extends StatelessWidget {
         colorScheme: lightDynamic,
         useMaterial3: true,
         textTheme: GoogleFonts.publicSansTextTheme(),
-        //textTheme: lightTypographyTheme,
         ),
         darkTheme:ThemeData(
           colorScheme: darkDynamic,
         brightness: Brightness.dark,
         useMaterial3: true,
         textTheme: GoogleFonts.publicSansTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
-        //textTheme: darkTypographyTheme,
         ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
     });
   }
