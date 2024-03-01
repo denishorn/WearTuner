@@ -1,26 +1,15 @@
 import 'dart:async';
-//import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_capture/flutter_audio_capture.dart';
-//import 'package:activity_ring/activity_ring.dart';
 import 'package:pitch_detector_dart/pitch_detector.dart';
-//import 'package:provider/provider.dart';
-//import 'package:time_text/time_text.dart';
-//import 'package:wear/wear.dart';
-//import 'package:pitchupdart/instrument_type.dart';
 import 'package:pitchupdart/pitch_handler.dart';
-////import 'package:permission_handler/permission_handler.dart';
 import 'package:vibration/vibration.dart';
 
 import 'widgets.dart'; 
 import 'tuner.dart'; 
-//import 'main.dart'; 
-// ! need to find optimal values
-//const double _sampleRate = 22050;
-//const int _bufferSize = 1000;
-//Timer? _frequencyMatchTimer;
+
 
 
 class MyHomePage extends StatefulWidget {
@@ -106,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //child: Center(
         child: Flex(
           direction: Axis.vertical,
-          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               //height: MediaQuery.of(context).size.width,
@@ -122,17 +111,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ControlsAndTunerWidget(
               onStartPressed: _startCapture,
               onStopPressed: _stopCapture,
-              constraints: BoxConstraints(
-              maxWidth: 500, // Example constraint
-    //minWidth: 100,
-    //maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).size.width, // Example constraint
-              ),
             ),
             //Spacer(flex: 10),
             TunerWidget(
-              constraints: BoxConstraints(
-              maxWidth: 500, // Example constraint
-            ),
+              // onStartPressed: _startCapture,
+              // onStopPressed: _stopCapture,
+            //   constraints: BoxConstraints(
+            //   maxWidth: 500, // Example constraint
+            // ),
             ),
         ]),
       //),

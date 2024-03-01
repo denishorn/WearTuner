@@ -4,19 +4,19 @@ import 'tuner.dart'; // Make sure to import the TunerWidget correctly
 class ControlsAndTunerWidget extends StatelessWidget {
   final VoidCallback onStartPressed;
   final VoidCallback onStopPressed;
-  final BoxConstraints constraints;
+  //final BoxConstraints constraints;
 
   const ControlsAndTunerWidget({
     Key? key,
     required this.onStartPressed,
     required this.onStopPressed,
-    required this.constraints,
+    //required this.constraints,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
   return Container(
-    constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+    //constraints: BoxConstraints(maxWidth: constraints.maxWidth),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -66,87 +66,6 @@ class TextDisplayWidget extends StatelessWidget {
   }
 }
 
-
-// class TunerWidget extends StatefulWidget {
-//     final BoxConstraints constraints; 
-
-//     TunerWidget({Key? key, required this.constraints}) : super(key: key);
-
-//   @override
-//   _TunerWidgetState createState() => _TunerWidgetState();
-// }
-
-// class _TunerWidgetState extends State<TunerWidget> {
-//   final Guitar guitar = const Guitar();
-
-//   Note? selectedNote;
-//   bool isAutoTune = true; // true for auto, false for manual
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return  Column(
-//       children: [
-//         SizedBox(
-//           height: 150,
-//           child: Stack(
-//             alignment: Alignment.center,
-//             children: [
-//               //Center(child:
-//                 Container(
-//                 height: 50,
-//                 width: MediaQuery.of(context).size.width - 40,
-//                 decoration: BoxDecoration(
-//                   color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33), // Use the theme's secondary color
-//                   borderRadius: BorderRadius.circular(15), // Adjust the radius to get the desired curvature
-//                 ),
-//               //)
-//               ),
-//             ListWheelScrollView(
-//               itemExtent: 50,
-//               overAndUnderCenterOpacity: 0.5,
-//               physics: FixedExtentScrollPhysics(),
-//               diameterRatio: 3,
-//               children: guitar.tuning.map((Note note) => 
-//               //GestureDetector(onTap: ()=>print('1'),
- 
-//               ListTile(
-//                 //child: Center(child: 
-//                 title:Text(note.toString(), textAlign: TextAlign.center),
-//                 onTap:(){print('!');}
-//                 //),
-//                 )
-//               )
-//               .toList(),
-//               onSelectedItemChanged: (index){},
-//             ),
-            
-//             ]
-//           ),
-//         ),
-//         // Switch for toggling between auto and manual tuning
-//         SwitchListTile(
-//           title: Text(
-//           'Automatic mode',
-//           style: Theme.of(context).textTheme.titleMedium, // Adjust the title size according to the app theme
-//         ),
-//           subtitle: Text(
-//             'Switch to automatically detect your string',
-//             style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-//             ),
-//           value: isAutoTune,
-//           isThreeLine: true,
-//           onChanged: (bool value) {
-//             setState(() {
-//               isAutoTune = value;
-//             });
-//           },
-//         ),
-//       ],
-//     //)
-//     );
-//   }
-// }
-
 class TuningWheel extends StatefulWidget {
   final Guitar guitar;
   final Function(int) onNoteSelected;
@@ -156,7 +75,7 @@ class TuningWheel extends StatefulWidget {
   @override
   _TuningWheelState createState() => _TuningWheelState();
 }
-//import 'package:flutter/material.dart';
+
 
 class _TuningWheelState extends State<TuningWheel> {
   final FixedExtentScrollController _controller = FixedExtentScrollController();
@@ -202,8 +121,8 @@ class _TuningWheelState extends State<TuningWheel> {
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (BuildContext context, int index) {
             if (index < 0 || index >= widget.guitar.tuning.length) return null;
-            return ListTile(
-                title: Text(widget.guitar.tuning[index].toString(), textAlign: TextAlign.center),
+            return Center(child:Text(widget.guitar.tuning[index].toString()),
+                //tileColor:Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33),
             );
           },
           childCount: widget.guitar.tuning.length,
@@ -240,9 +159,9 @@ class AutoTuneSwitch extends StatelessWidget {
 }
 
 class TunerWidget extends StatefulWidget {
-  final BoxConstraints constraints;
+  //final BoxConstraints constraints;
 
-  TunerWidget({Key? key, required this.constraints}) : super(key: key);
+  TunerWidget({Key? key}) : super(key: key);
 
   @override
   _TunerWidgetState createState() => _TunerWidgetState();
@@ -257,6 +176,10 @@ class _TunerWidgetState extends State<TunerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // ControlsAndTunerWidget(
+        //       onStartPressed: _startCapture,
+        //       onStopPressed: _stopCapture,
+        //     ),
         SizedBox(
           height: 150,
           child: Stack(
