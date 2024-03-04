@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.publicSansTextTheme(),
         ),
         darkTheme:ThemeData(
-          colorScheme: darkDynamic,
+          colorScheme: darkDynamic, 
         brightness: Brightness.dark,
         useMaterial3: true,
         textTheme: GoogleFonts.publicSansTextTheme(ThemeData(brightness: Brightness.dark).textTheme),

@@ -11,8 +11,6 @@ import 'package:vibration/vibration.dart';
 import 'widgets.dart'; 
 import 'tuner.dart'; 
 
-
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
   @override
@@ -24,6 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final pitchDetectorDart = PitchDetector(44100, 2000);
   final Guitar guitar = const Guitar();
   bool isAutoTune = false;
+  Note? currentNote;
   var note = "";
   var status = "Click on start";
 
@@ -56,8 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Note closestNote = guitar.findClosestNote(frequency);
 
   setState(() {
-    note = result.pitch.toStringAsFixed(1); // Now 'note' will hold the string representation of the closest note
-    status = "Closest note: ${closestNote.toString()} , ${closestNote.frequency.toString()}"; // Updates status to show the closest note
+    note = result.pitch.toStringAsFixed(1); 
+    status = "Closest note: ${closestNote.toString()} , ${closestNote.frequency.toString()} ,${isAutoTune.toString()}, ${currentNote.toString()}"; // Updates status to show the closest note
   });
     }
   }
@@ -68,40 +67,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
-      body: SafeArea(
-        child: Flex(
-          direction: Axis.vertical,
-          children: [
-            Padding(padding: EdgeInsets.all(8.0), child:Container(
+  return Scaffold(
+    body: SafeArea(
+      child: Flex(
+        direction: Axis.vertical,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Container(
               height: MediaQuery.of(context).size.width,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33), 
-                borderRadius: BorderRadius.circular(15), 
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.33),
+                borderRadius: BorderRadius.circular(15),
               ),
-              child: TextDisplayWidget(note: note, status: status),
+              child: TextDisplayWidget(note: note, status: status), // Assuming TextDisplayWidget is defined elsewhere
             ),
-            ),
-            Flex(
-              direction: Axis.vertical,
-              children:[
-            ControlsAndTunerWidget(
-              onStartPressed: _startCapture,
-              onStopPressed: _stopCapture,
-            ),
-            TunerWidget(
-              isAutoTune: isAutoTune,
-              onChanged: (bool value) {
-                setState(() {
-                  isAutoTune = value;
-                });
-              },
-            ),
-            ]),
-        ]),
+          ),
+          Flex(
+            direction: Axis.vertical,
+            children: [
+              PlayNoteButton(
+                frequency: currentNote?.frequency ?? 0.0,
+              ),
+              
+              TuningWheelContainerWidget(
+                isAutoTune: isAutoTune,
+                onChangedNote: (Note changedNote) {
+                  setState(() {
+                    currentNote = changedNote;
+                  });
+                },
+                onChanged: (bool value) {
+                  setState(() {
+                    isAutoTune = value;
+                  });
+                },
+                guitar: guitar, // Assuming guitar is defined and passed correctly
+              ),
+              AutoTuneSwitchWidget(
+                isAutoTune: isAutoTune,
+                onChanged: (bool value) {
+                  setState(() {
+                    isAutoTune = value;
+                  });
+                },
+              ),
+              ControlsAndTunerWidget(
+                onStartPressed: _startCapture, // Assuming _startCapture is defined elsewhere
+                onStopPressed: _stopCapture, // Assuming _stopCapture is defined elsewhere
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
