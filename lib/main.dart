@@ -7,7 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 
 import 'homepage.dart';
-import 'theme/theme.dart';
+import 'introduction.dart';
+//import 'theme/theme.dart';
 void main() {
   // LicenseRegistry.addLicense(() async* {
   //   final license = await rootBundle.loadString('google_fonts/OFL.txt');
@@ -28,14 +29,28 @@ class MyApp extends StatelessWidget {
         colorScheme: lightDynamic,
         useMaterial3: true,
         textTheme: GoogleFonts.publicSansTextTheme(),
+        snackBarTheme: const SnackBarThemeData(
+            //dismissDirection: DismissDirection.horizontal,
+            behavior: SnackBarBehavior.floating,
+            showCloseIcon: true,
+            //shape: RoundedRectangleBorder(
+            //borderRadius: BorderRadius.circular(6.0),),
+        ),
         ),
         darkTheme:ThemeData(
           colorScheme: darkDynamic, 
         brightness: Brightness.dark,
         useMaterial3: true,
         textTheme: GoogleFonts.publicSansTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
+        snackBarTheme: const SnackBarThemeData(
+            //dismissDirection: DismissDirection.horizontal,
+            behavior: SnackBarBehavior.floating,
+            showCloseIcon: true,
+            // shape: RoundedRectangleBorder(
+            // borderRadius: BorderRadius.circular(6.0),),
         ),
-      home: const MyHomePage(),
+        ),
+      home: const SimplePageView(),
     );
     });
   }

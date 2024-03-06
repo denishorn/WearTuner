@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_capture/flutter_audio_capture.dart';
 import 'package:pitch_detector_dart/pitch_detector.dart';
 import 'package:pitchupdart/pitch_handler.dart';
-import 'package:vibration/vibration.dart';
-//import 'package:wakelock_plus/wakelock_plus.dart';
+//import 'package:vibration/vibration.dart';
 
 import 'widgets.dart'; 
 import 'tuner.dart'; 
+
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -22,9 +23,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final pitchDetectorDart = PitchDetector(44100, 2000);
   final Guitar guitar = const Guitar();
   bool isAutoTune = false;
-  Note? currentNote;
-  var note = "";
-  var status = "Click on start";
+  late Note currentSelectorNote;
+  String targetNote = "";
+  String note = "";
+  String status = "Click on start";
+
+  @override
+  void initState() {
+    super.initState();
+    currentSelectorNote = guitar.tuning[0];
+  }
+
+  
 
   Future<void> _startCapture() async {
     await _audioRecorder.start(listener, onError,
@@ -52,11 +62,16 @@ class _MyHomePageState extends State<MyHomePage> {
     if (result.pitched) {
       final frequency = result.pitch;
 
-  Note closestNote = guitar.findClosestNote(frequency);
+  //Note closestNote = guitar.findClosestNote(frequency);
+  if(!isAutoTune){
+    targetNote = currentSelectorNote.name;
+  }else{
+    targetNote = guitar.findClosestNote(frequency).name;
+  }
 
   setState(() {
     note = result.pitch.toStringAsFixed(1); 
-    status = "Closest note: ${closestNote.toString()} , ${closestNote.frequency.toString()} ,${isAutoTune.toString()}, ${currentNote.toString()}"; // Updates status to show the closest note
+    status = "Closest note: ${isAutoTune.toString()}, ${targetNote}"; // Updates status to show the closest note
   });
     }
   }
@@ -87,15 +102,24 @@ class _MyHomePageState extends State<MyHomePage> {
           Flex(
             direction: Axis.vertical,
             children: [
-              PlayNoteButton(
-                frequency: currentNote?.frequency ?? 0.0,
-              ),
+              Container(
+                width : MediaQuery.of(context).size.width,
+                height : 82,
+                padding: EdgeInsets.all(16.0),
+                child:PlayNoteButton(
+                  noteToPlay: currentSelectorNote,
+                  isAutoTune: isAutoTune,
+                  onStartPressed: _startCapture, // Assuming _startCapture is defined elsewhere
+                  onStopPressed: _stopCapture, // Assuming _stopCapture is defined elsewhere
+              )),
               
               TuningWheelContainerWidget(
                 isAutoTune: isAutoTune,
                 onChangedNote: (Note changedNote) {
                   setState(() {
-                    currentNote = changedNote;
+                    if (!isAutoTune){
+                      currentSelectorNote = changedNote;
+                    }
                   });
                 },
                 onChanged: (bool value) {

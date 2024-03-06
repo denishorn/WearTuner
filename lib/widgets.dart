@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'tuner.dart'; 
-import 'package:sound_generator/sound_generator.dart';
-import 'package:sound_generator/waveTypes.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_midi/flutter_midi.dart';
+import 'package:flutter/foundation.dart';
+
 
 
 class ControlsAndTunerWidget extends StatelessWidget {
@@ -105,14 +107,17 @@ class _AutoTuneSwitchWidgetState extends State<AutoTuneSwitchWidget> {
 }
 //------------
 class PlayNoteButton extends StatefulWidget {
-  
-   final double frequency;
+  final VoidCallback onStartPressed;
+  final VoidCallback onStopPressed;
+  final Note noteToPlay;
+  final bool isAutoTune;
 
   const PlayNoteButton({
     Key? key,
-    // required this.onStartPressed,
-    // required this.onStopPressed,
-    required this.frequency,
+    required this.noteToPlay,
+    required this.isAutoTune,
+    required this.onStartPressed,
+    required this.onStopPressed,
   }) : super(key: key);
 
   @override
@@ -120,32 +125,95 @@ class PlayNoteButton extends StatefulWidget {
 }
 
 class _PlayNoteButtonState extends State<PlayNoteButton> {
+  final _flutterMidi = FlutterMidi();
+
+  int noteNameToMidiNumber(String noteName) {
+    // Map of note names to their semitone offsets from C
+    const Map<String, int> noteOffsets = {
+      'C': 0, 'Db': 1, 'D': 2, 'Eb': 3, 'E': 4, 'F': 5,
+      'Gb': 6, 'G': 7, 'Ab': 8, 'A': 9, 'Bb': 10, 'B': 11,
+    };
+
+    // Extract the note letter (and accidental if present) and octave
+    RegExp regExp = RegExp(r"([A-G][b]?)(\d)");
+    var matches = regExp.firstMatch(noteName);
+    if (matches != null && matches.groupCount == 2) {
+      String note = matches.group(1)!; // Note letter and accidental
+      int octave = int.parse(matches.group(2)!); // Octave
+
+      // Calculate the MIDI note number
+      int midiNumber = (octave + 1) * 12 + noteOffsets[note]!;
+      return midiNumber;
+    } else {
+      throw FormatException("Invalid note format", noteName);
+    }
+  }
   @override
   void initState() {
+    _flutterMidi.prepare(sf2: null);
     super.initState();
-    // Initialize your sound generator here.
-    SoundGenerator.init(44100);
-    SoundGenerator.setWaveType(waveTypes.SINUSOIDAL);
-    // Add any other initialization code here.
+    load();
   }
+
+  void load() async {
+  print('Loading Soundfont...');    
+    _flutterMidi.unmute();
+    ByteData _byte = await rootBundle.load('assets/Guitar.SF2');
+    //assets/sf2/SmallTimGM6mb.sf2
+    //assets/sf2/Piano.SF2
+    await _flutterMidi.prepare(sf2: _byte, name: 'Guitar.SF2');
+      print('Soundfont Loaded');
+
+  }
+void _play(int midi) async {
+  
+  print('Playing MIDI note...');
+  widget.onStopPressed();
+  _flutterMidi.playMidiNote(midi: midi);
+
+  // Wait for 1 second
+  await Future.delayed(Duration(milliseconds: 700));
+
+  // Stop the note
+  _flutterMidi.stopMidiNote(midi: midi);
+  widget.onStartPressed();
+  print('Stopped MIDI note.');
+}
+
+  //String _value = 'assets/Guitar.SF2';
+
 
   @override
   Widget build(BuildContext context) {
-    return /*Container(
-      child:*/ Padding(
+    return /* Padding(
         padding: EdgeInsets.all(16.0),
-        child: FloatingActionButton(
+        child: */FilledButton.icon(
+          style: ButtonStyle ( shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(32),),),),
           onPressed: () {
-              SoundGenerator.stop();
-              SoundGenerator.setFrequency(widget.frequency);
-              SoundGenerator.setVolume(0.5);
-              SoundGenerator.play();
+            if(widget.isAutoTune){ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Turn auto select mode off first!'),
+            duration: Duration(milliseconds: 3000),
+            dismissDirection: DismissDirection.horizontal,
+            // behavior: SnackBarBehavior.floating,
+            // showCloseIcon: true,
+             shape: RoundedRectangleBorder(
+               borderRadius: BorderRadius.circular(6.0),),
+            
+          ),
+        );} else {
+          int midiNote = noteNameToMidiNumber(widget.noteToPlay.name);
+          _play(midiNote);
+          }
+            
           },
-          child: const Text("Start"),
-        ),
+          label: const Text("Play Note"),
+          icon: Icon(Icons.play_arrow),
+
       //),
     );
   }
+  
 }
 
 //------------ 
@@ -229,7 +297,7 @@ WidgetsBinding.instance.addPostFrameCallback((_) {
         }
       });
       _controller.animateToItem(
-        nextIndex,
+        (nextIndex >= widget.guitar.tuning.length) ? 0 : nextIndex,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       ).then((_) {
@@ -258,12 +326,12 @@ WidgetsBinding.instance.addPostFrameCallback((_) {
           ),
         );
       },
-      childCount: null, // Infinite scroll
+      childCount: widget.guitar.tuning.length, 
     ),
     onSelectedItemChanged: (index) {
       setState(() {
         int ind = index % widget.guitar.tuning.length;
-        widget.onChangedNote(widget.guitar.tuning[ind]);
+        widget.onChangedNote(widget.guitar.tuning[index]);
       });
     },
   ),
