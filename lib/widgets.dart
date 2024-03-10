@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'tuner.dart'; 
+import 'tuner.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_midi/flutter_midi.dart';
 import 'package:flutter/foundation.dart';
-
-
 
 class ControlsAndTunerWidget extends StatelessWidget {
   final VoidCallback onStartPressed;
@@ -20,33 +18,32 @@ class ControlsAndTunerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  return Container(
-    //constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        // const SizedBox(width: 16),
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: FloatingActionButton(
-            onPressed: onStartPressed,
-            child: const Text("Start"),
+    return Container(
+      //constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // const SizedBox(width: 16),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: FloatingActionButton(
+              onPressed: onStartPressed,
+              child: const Text("Start"),
+            ),
           ),
-        ),
-        // const SizedBox(width: 16),
-        Padding(
-          padding: EdgeInsets.all(16.0),
-          child: FloatingActionButton(
-            onPressed: onStopPressed,
-            child: const Text("Stop"),
+          // const SizedBox(width: 16),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: FloatingActionButton(
+              onPressed: onStopPressed,
+              child: const Text("Stop"),
+            ),
           ),
-        ),
-        // const SizedBox(width: 16),
-      ],
-    ),
-  );
+          // const SizedBox(width: 16),
+        ],
+      ),
+    );
   }
-
 }
 
 class TextDisplayWidget extends StatelessWidget {
@@ -66,7 +63,6 @@ class TextDisplayWidget extends StatelessWidget {
         Text(note),
         Text(status),
       ],
-    
     );
   }
 }
@@ -97,7 +93,11 @@ class _AutoTuneSwitchWidgetState extends State<AutoTuneSwitchWidget> {
       ),
       subtitle: Text(
         'The app will automatically select the note for you',
-        style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.85)),
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(
+            color: Theme.of(context)
+                .colorScheme
+                .onSurfaceVariant
+                .withOpacity(0.85)),
       ),
       value: widget.isAutoTune,
       isThreeLine: true,
@@ -105,6 +105,7 @@ class _AutoTuneSwitchWidgetState extends State<AutoTuneSwitchWidget> {
     );
   }
 }
+
 //------------
 class PlayNoteButton extends StatefulWidget {
   final VoidCallback onStartPressed;
@@ -130,8 +131,18 @@ class _PlayNoteButtonState extends State<PlayNoteButton> {
   int noteNameToMidiNumber(String noteName) {
     // Map of note names to their semitone offsets from C
     const Map<String, int> noteOffsets = {
-      'C': 0, 'Db': 1, 'D': 2, 'Eb': 3, 'E': 4, 'F': 5,
-      'Gb': 6, 'G': 7, 'Ab': 8, 'A': 9, 'Bb': 10, 'B': 11,
+      'C': 0,
+      'Db': 1,
+      'D': 2,
+      'Eb': 3,
+      'E': 4,
+      'F': 5,
+      'Gb': 6,
+      'G': 7,
+      'Ab': 8,
+      'A': 9,
+      'Bb': 10,
+      'B': 11,
     };
 
     // Extract the note letter (and accidental if present) and octave
@@ -148,6 +159,7 @@ class _PlayNoteButtonState extends State<PlayNoteButton> {
       throw FormatException("Invalid note format", noteName);
     }
   }
+
   @override
   void initState() {
     _flutterMidi.prepare(sf2: null);
@@ -156,67 +168,72 @@ class _PlayNoteButtonState extends State<PlayNoteButton> {
   }
 
   void load() async {
-  print('Loading Soundfont...');    
+    print('Loading Soundfont...');
     _flutterMidi.unmute();
     ByteData _byte = await rootBundle.load('assets/Guitar.SF2');
     //assets/sf2/SmallTimGM6mb.sf2
     //assets/sf2/Piano.SF2
     await _flutterMidi.prepare(sf2: _byte, name: 'Guitar.SF2');
-      print('Soundfont Loaded');
-
+    print('Soundfont Loaded');
   }
-void _play(int midi) async {
-  
-  print('Playing MIDI note...');
-  widget.onStopPressed();
-  _flutterMidi.playMidiNote(midi: midi);
 
-  // Wait for 1 second
-  await Future.delayed(Duration(milliseconds: 700));
+  void _play(int midi) async {
+    print('Playing MIDI note...');
+    widget.onStopPressed();
+    _flutterMidi.playMidiNote(midi: midi);
 
-  // Stop the note
-  _flutterMidi.stopMidiNote(midi: midi);
-  widget.onStartPressed();
-  print('Stopped MIDI note.');
-}
+    // Wait for 1 second
+    await Future.delayed(Duration(milliseconds: 700));
+
+    // Stop the note
+    _flutterMidi.stopMidiNote(midi: midi);
+    widget.onStartPressed();
+    print('Stopped MIDI note.');
+  }
 
   //String _value = 'assets/Guitar.SF2';
-
 
   @override
   Widget build(BuildContext context) {
     return /* Padding(
         padding: EdgeInsets.all(16.0),
-        child: */FilledButton.icon(
-          style: ButtonStyle ( shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(32),),),),
-          onPressed: () {
-            if(widget.isAutoTune){ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Turn auto select mode off first!'),
-            duration: Duration(milliseconds: 3000),
-            dismissDirection: DismissDirection.horizontal,
-            // behavior: SnackBarBehavior.floating,
-            // showCloseIcon: true,
-             shape: RoundedRectangleBorder(
-               borderRadius: BorderRadius.circular(6.0),),
-            
+        child: */
+        FilledButton.icon(
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
           ),
-        );} else {
+        ),
+      ),
+      onPressed: () {
+        if (widget.isAutoTune) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Turn auto select mode off first!'),
+              duration: Duration(milliseconds: 3000),
+              dismissDirection: DismissDirection.horizontal,
+              // behavior: SnackBarBehavior.floating,
+              // showCloseIcon: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+            ),
+          );
+        } else {
           int midiNote = noteNameToMidiNumber(widget.noteToPlay.name);
           _play(midiNote);
-          }
-            
-          },
-          label: const Text("Play Note"),
-          icon: Icon(Icons.play_arrow),
+        }
+      },
+      label: const Text("Play Note"),
+      icon: Icon(Icons.play_arrow),
 
       //),
     );
   }
-  
 }
 
-//------------ 
+//------------
 
 class TuningWheelContainerWidget extends StatefulWidget {
   final bool isAutoTune;
@@ -233,22 +250,25 @@ class TuningWheelContainerWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _TuningWheelContainerWidgetState createState() => _TuningWheelContainerWidgetState();
+  _TuningWheelContainerWidgetState createState() =>
+      _TuningWheelContainerWidgetState();
 }
 
-class _TuningWheelContainerWidgetState extends State<TuningWheelContainerWidget> {
+class _TuningWheelContainerWidgetState
+    extends State<TuningWheelContainerWidget> {
   final FixedExtentScrollController _controller = FixedExtentScrollController();
   bool _isAnimating = false;
-@override
+  @override
   void initState() {
     super.initState();
-WidgetsBinding.instance.addPostFrameCallback((_) {
-    setState(() {
-      final initialNote = widget.guitar.tuning[0];
-      widget.onChangedNote(initialNote);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        final initialNote = widget.guitar.tuning[0];
+        widget.onChangedNote(initialNote);
+      });
     });
-  }); 
   }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -256,86 +276,103 @@ WidgetsBinding.instance.addPostFrameCallback((_) {
   }
 
   @override
-  Widget build(BuildContext context) { 
-    return Container( 
+  Widget build(BuildContext context) {
+    double dark = widget.isAutoTune ? 0.33 : 1;
+    return Container(
       height: 150,
+      //duration: Duration(milliseconds: 150),
       padding: const EdgeInsets.all(16.0),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedOpacity(
+          /*AnimatedOpacity(
             opacity: widget.isAutoTune ? 0.0 : 0.33,
             duration: Duration(milliseconds: 150),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(32),
-              ),
+            child:*/
+          AnimatedContainer(
+            height: widget.isAutoTune ? 150 : 50,
+            duration: Duration(milliseconds: 180),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceVariant
+                  .withOpacity(dark),
+              borderRadius: BorderRadius.circular(32),
             ),
           ),
+          //),
           GestureDetector(
-  onTapDown: (details) {
-    // You can perform actions here when the tap down event occurs.
-  },
-  onTapCancel: () {
-    // This block is executed when the tap is cancelled.
-    setState(() {
-      if (widget.isAutoTune) {
-        widget.onChanged(false);
-      }
-    });
-  },
-  onTapUp: (details) {
-    // This block is executed when the tap is released.
-    if (!_isAnimating) {
-      int nextIndex = widget.isAutoTune ? _controller.selectedItem : _controller.selectedItem + 1;
-      setState(() {
-        _isAnimating = true;
-        if (widget.isAutoTune) {
-          widget.onChanged(false);
-        }
-      });
-      _controller.animateToItem(
-        (nextIndex >= widget.guitar.tuning.length) ? 0 : nextIndex,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      ).then((_) {
-        setState(() {
-          _isAnimating = false;
-        });
-      });
-    }
-  },
-  child: ListWheelScrollView.useDelegate(
-    controller: _controller,
-    itemExtent: 50,
-    overAndUnderCenterOpacity: 0.5,
-    physics: (_isAnimating || widget.isAutoTune) ? NeverScrollableScrollPhysics() : FixedExtentScrollPhysics(),
-    diameterRatio: 3,
-    childDelegate: ListWheelChildBuilderDelegate(
-      builder: (BuildContext context, int index) {
-        int loopedIndex = index % widget.guitar.tuning.length;
-        if (loopedIndex < 0) {
-          loopedIndex += widget.guitar.tuning.length;
-        }
-        return Center(
-          child: Text(
-            widget.guitar.tuning[loopedIndex].toString(),
-            style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            onTapDown: (details) {
+              // You can perform actions here when the tap down event occurs.
+            },
+            onTapCancel: () {
+              // This block is executed when the tap is cancelled.
+              setState(() {
+                if (widget.isAutoTune) {
+                  widget.onChanged(false);
+                }
+              });
+            },
+            onTapUp: (details) {
+              // This block is executed when the tap is released.
+              if (!_isAnimating) {
+                int nextIndex = widget.isAutoTune
+                    ? _controller.selectedItem
+                    : _controller.selectedItem + 1;
+                setState(() {
+                  _isAnimating = true;
+                  if (widget.isAutoTune) {
+                    widget.onChanged(false);
+                  }
+                });
+                _controller
+                    .animateToItem(
+                  (nextIndex >= widget.guitar.tuning.length) ? 0 : nextIndex,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                )
+                    .then((_) {
+                  setState(() {
+                    _isAnimating = false;
+                  });
+                });
+              }
+            },
+            child: ListWheelScrollView.useDelegate(
+              controller: _controller,
+              itemExtent: 50,
+              overAndUnderCenterOpacity: widget.isAutoTune ? 1 : 0.5,
+              physics: (_isAnimating || widget.isAutoTune)
+                  ? NeverScrollableScrollPhysics()
+                  : FixedExtentScrollPhysics(),
+              diameterRatio: 3,
+              childDelegate: ListWheelChildBuilderDelegate(
+                builder: (BuildContext context, int index) {
+                  // int loopedIndex = index % widget.guitar.tuning.length;
+                  // if (loopedIndex < 0) {
+                  //   loopedIndex += widget.guitar.tuning.length;
+                  // }
+                  return Center(
+                    child: Text(
+                      widget.guitar.tuning[index].name,
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(dark)),
+                    ),
+                  );
+                },
+                childCount: widget.guitar.tuning.length,
+              ),
+              onSelectedItemChanged: (index) {
+                setState(() {
+                  //int ind = index % widget.guitar.tuning.length;
+                  widget.onChangedNote(widget.guitar.tuning[index]);
+                });
+              },
+            ),
           ),
-        );
-      },
-      childCount: widget.guitar.tuning.length, 
-    ),
-    onSelectedItemChanged: (index) {
-      setState(() {
-        int ind = index % widget.guitar.tuning.length;
-        widget.onChangedNote(widget.guitar.tuning[index]);
-      });
-    },
-  ),
-),
         ],
       ),
     );
